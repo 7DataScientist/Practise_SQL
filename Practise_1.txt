@@ -1,0 +1,53 @@
+use moviesdb;
+
+select * from movies;
+select * from moviesdb.movies;
+
+select * from moviesdb.movies where industry = "bollywood";
+select * from moviesdb.movies where industry = "hollywood";
+
+select count(*) from movies where industry = "bollywood";
+select count(distinct title) from movies  where industry = "bollywood";
+
+select distinct studio, industry from moviesdb.movies;
+
+select title, industry from movies;
+
+select * from moviesdb.movies where title like "%THOR%";
+select * from moviesdb.movies where title like "%america%";
+
+-- Distinct, Select, Where, Like
+
+-- ------------------------------------------------------
+
+-- Numeric Queries 
+
+select * from moviesdb.movies;
+
+select * from moviesdb.movies where imdb_rating >= 9.0;
+select * from moviesdb.movies where imdb_rating > 9.0;
+
+select * from moviesdb.movies where imdb_rating > 6 and imdb_rating < 9;
+select * from moviesdb.movies where imdb_rating between 6 and 9;
+
+
+select * from moviesdb.movies where release_year = 2018 or release_year = 2019 or release_year = 2022;
+select * from moviesdb.movies where release_year in (2022,2019,2018);
+
+select * from moviesdb.movies where studio in ('Marvel Studios','Salman Khan Films');
+
+
+select * from moviesdb.movies;
+
+
+select * from moviesdb.movies where imdb_rating is Null;
+
+select * from moviesdb.movies where imdb_rating is not Null;
+
+select * from moviesdb.movies where industry = "bollywood" order by imdb_rating;
+select * from moviesdb.movies where industry = "bollywood" order by imdb_rating desc;
+
+
+select * from moviesdb.movies order by imdb_rating desc limit 5;
+
+select * from moviesdb.movies where industry = "bollywood" order by imdb_rating desc LIMIT 5 OFFSET 2;
