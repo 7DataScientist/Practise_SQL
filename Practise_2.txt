@@ -1,0 +1,66 @@
+-- Summary Analytics ------------
+
+select * from moviesdb.movies;
+
+select count(*) from moviesdb.movies where industry = "bollywood";
+select count(*) from moviesdb.movies where industry = "hollywood";
+
+
+select avg(imdb_rating) from moviesdb.movies where industry = "bollywood";
+select round(avg(imdb_rating),2) from moviesdb.movies where industry = "hollywood";
+
+select min(imdb_rating) from moviesdb.movies where industry = "bollywood";
+
+select title, imdb_rating from moviesdb.movies where industry = "bollywood" and imdb_rating = 1.9;
+
+select avg(imdb_rating) from moviesdb.movies where studio = "Marvel Studios";
+select round(avg(imdb_rating),2) from moviesdb.movies where studio = "Marvel Studios";
+
+
+select round(avg(imdb_rating),2) as avg_imdb from moviesdb.movies where studio = "Marvel Studios";
+
+select count(*) from moviesdb.movies where industry in ("hollywood", "bollywood");
+
+-- bollywood = 18
+-- hollywood = 21
+
+select industry, count(*) from moviesdb.movies group by industry;
+
+select  studio, industry,count(*) from moviesdb.movies group by studio;
+
+select  studio, industry,count(*) as cnt from moviesdb.movies group by studio order by cnt desc limit 5;
+
+select  studio, industry,count(*) as cnt from moviesdb.movies where studio !="" group by studio order by cnt desc;
+
+select  studio, industry,count(*) as cnt from moviesdb.movies where studio like "M%" group by studio order by cnt desc;
+
+
+-- this is wrong 
+select  studio, industry,count(*) as cnt from moviesdb.movies where cnt > 2 group by studio order by cnt desc;
+
+
+select  studio, industry,count(*) as cnt from moviesdb.movies group by studio having cnt > 2  order by cnt desc;
+
+
+-- Calculated Columns
+
+select * from moviesdb.actors;
+
+select *, curdate() from moviesdb.actors;
+
+select *, year(curdate()) from moviesdb.actors;
+
+select *, year(curdate()) - birth_year as age from moviesdb.actors;
+
+select * from moviesdb.financials;
+
+select *, revenue - budget as profit from moviesdb.financials;
+
+select *, revenue - budget as profit from moviesdb.financials order by profit desc;
+
+select *, IF(currency = "INR", revenue, revenue * 82 ) as revenue_inr from moviesdb.financials order by revenue desc;
+
+select *, 
+IF(currency = "INR", revenue, revenue * 82 ) as revenue_inr, 
+IF(currency = "INR", budget, budget * 82 ) as budget_inr
+from moviesdb.financials order by revenue_inr desc;
