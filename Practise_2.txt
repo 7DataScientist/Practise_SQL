@@ -64,3 +64,12 @@ select *,
 IF(currency = "INR", revenue, revenue * 82 ) as revenue_inr, 
 IF(currency = "INR", budget, budget * 82 ) as budget_inr
 from moviesdb.financials order by revenue_inr desc;
+
+
+select movie_id, budget, revenue, unit, 
+	case
+		when unit = "thousands" then revenue/1000
+        when unit = "millions" then revenue
+        when unit = "billions" then revenue * 1000
+    end as rev_mln
+from moviesdb.financials order by rev_mln desc;
