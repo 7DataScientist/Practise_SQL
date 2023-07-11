@@ -1,0 +1,174 @@
+-- Inner Join  
+
+-- select * 
+-- from table_1 t1
+-- join table_2 t2
+-- on t1.col1 = t2.col1
+
+select * from moviesdb.movies;
+select * from moviesdb.languages;
+select * from moviesdb.financials;
+
+select * from 
+moviesdb.movies 
+join moviesdb.financials
+on movies.movie_id = financials.movie_id;
+
+select m.title, m.movie_id, f.budget, m.imdb_rating from 
+moviesdb.movies m
+inner join moviesdb.financials f
+on m.movie_id = f.movie_id;
+
+
+select m.title, m.movie_id, f.budget, m.imdb_rating from 
+moviesdb.movies m
+inner join moviesdb.financials f
+using(movie_id);
+
+
+select m.title, m.movie_id, f.budget, m.imdb_rating from 
+moviesdb.movies m
+inner join moviesdb.financials f
+using(movie_id) where m.imdb_rating > 7.5 order by m.imdb_rating desc;
+
+--  Left Join
+
+select * from 
+moviesdb.movies 
+left join moviesdb.financials
+on movies.movie_id = financials.movie_id;
+
+-- Right Join
+
+select * from 
+moviesdb.movies m
+right join moviesdb.financials f
+on m.movie_id = f.movie_id; 
+
+select f.movie_id,m.title,m.industry,f.budget,f.revenue from 
+moviesdb.movies m
+right join moviesdb.financials f
+on m.movie_id = f.movie_id; 
+
+-- Full Join
+
+select f.movie_id,m.title,m.industry,f.budget,f.revenue 
+from moviesdb.movies as m
+left join moviesdb.financials as f
+on m.movie_id = f.movie_id
+
+
+union
+
+select f.movie_id,m.title,m.industry,f.budget,f.revenue 
+from moviesdb.movies as m
+right join moviesdb.financials as f
+on m.movie_id = f.movie_id;
+
+
+-- Analytics on Tables 
+
+select * from moviesdb.movies;
+select * from moviesdb.languages;
+select * from moviesdb.financials;
+
+-- 1. Movie Title, Profit,Budget, Revenue ?  
+
+select *, round(((revenue-budget)*100)/budget,2) as profit from moviesdb.financials;
+
+
+select m.title, f.budget, f.revenue, round(((revenue-budget)*100)/budget,2) as profit, f.unit
+from moviesdb.movies as m
+join moviesdb.financials as f
+on m.movie_id = f.movie_id
+where industry = "bollywood"
+order by profit desc;
+
+-- Highest Profit 
+
+
+select title, budget, revenue, unit, round((revenue-budget),2) as profit,
+case
+	when unit="thousands" then round((revenue-budget)/1000,2)
+    when unit="millions" then round((revenue-budget),2)
+    when unit="billions" then round((revenue-budget)*1000,2)
+end as profit_nor
+from moviesdb.movies as m
+join moviesdb.financials as f
+on m.movie_id = f.movie_id
+where industry = "bollywood"
+order by profit_nor desc;
+
+-- Joining more than 2 tables
+
+select * from moviesdb.movies;
+select * from moviesdb.languages;
+select * from moviesdb.movie_actor;
+select * from moviesdb.actors;
+
+-- title , actor, language 
+
+select * 
+from moviesdb.movies m
+join moviesdb.languages l
+on m.language_id = l.language_id;
+
+
+select m.title, l.name as lang, a.name
+from moviesdb.movies m
+
+join moviesdb.languages l
+on m.language_id = l.language_id
+
+join moviesdb.movie_actor ma
+on m.movie_id = ma.movie_id
+
+join moviesdb.actors a
+on a.actor_id = ma.actor_id;
+
+
+-- Group Concat
+
+select m.title, l.name as lang, group_concat(a.name separator " | ") as actors
+from moviesdb.movies m
+
+join moviesdb.languages l
+on m.language_id = l.language_id
+
+join moviesdb.movie_actor ma
+on m.movie_id = ma.movie_id
+
+join moviesdb.actors a
+on a.actor_id = ma.actor_id
+
+group by m.title; 
+
+
+select m.title, l.name as lang, group_concat(a.name separator " | ") as actors, count(a.name) as cnt
+from moviesdb.movies m
+
+join moviesdb.languages l
+on m.language_id = l.language_id
+
+join moviesdb.movie_actor ma
+on m.movie_id = ma.movie_id
+
+join moviesdb.actors a
+on a.actor_id = ma.actor_id
+
+group by m.title; 
+
+
+------------ 
+
+select a.name, group_concat(m.title separator " | ") as title, count(m.title) as cnt
+from moviesdb.movies m
+
+join moviesdb.movie_actor ma
+on m.movie_id = ma.movie_id
+
+join moviesdb.actors a
+on ma.actor_id = a.actor_id
+
+group by a.name
+order by cnt desc;
