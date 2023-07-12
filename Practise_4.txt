@@ -1,0 +1,78 @@
+-- Complex Queries
+
+select * from moviesdb.movies;
+
+select max(imdb_rating) from moviesdb.movies;
+
+select * from moviesdb.movies where movies.imdb_rating = 9.3;
+
+select * from moviesdb.movies where movies.imdb_rating = max(imdb_rating);
+
+select * from moviesdb.movies where movies.imdb_rating = (select max(imdb_rating) from moviesdb.movies);
+select * from moviesdb.movies where movies.imdb_rating = (select min(imdb_rating) from moviesdb.movies);
+
+
+select avg(imdb_rating) from moviesdb.movies;
+
+select * from moviesdb.movies where movies.imdb_rating < (select avg(imdb_rating) from moviesdb.movies);
+
+select * from moviesdb.movies where movies.imdb_rating in ((select max(imdb_rating) from moviesdb.movies),(select min(imdb_rating) from moviesdb.movies)); 
+
+select * from moviesdb.movies where movies.imdb_rating 
+= (select max(imdb_rating) from moviesdb.movies) or imdb_rating = (select min(imdb_rating) from moviesdb.movies);
+
+
+select * from moviesdb.actors;
+
+select `name`, year(curdate()) - birth_year as age from moviesdb.actors;
+
+select `name`, year(curdate()) - birth_year as age from moviesdb.actors where age < 85 and age > 50;
+
+select `name`, year(curdate()) - birth_year as age from moviesdb.actors 
+where year(curdate()) - birth_year > 50 and year(curdate()) - birth_year < 85;
+
+
+select * from (select `name`, year(curdate()) - birth_year as age from moviesdb.actors) as age_d
+where age < 85 and age > 50; 
+
+
+select * from (select `name`, year(curdate()) - birth_year as age from moviesdb.actors) as age_d
+where age < 85 and age > 50; 
+
+
+select movie_id,budget,revenue, (revenue-budget) as profit from moviesdb.financials;
+
+-- profit 300 and 800
+
+select movie_id,budget,revenue, (revenue-budget) as profit from moviesdb.financials
+where (revenue-budget) < 800 and (revenue-budget) > 300;
+
+
+select * from 
+(select movie_id,budget,revenue, (revenue-budget) as profit from moviesdb.financials) as f_prf
+where profit < 800 and profit > 300;
+
+
+select m.title,f.budget,f.revenue, (f.revenue-f.budget) as profit  from 
+moviesdb.movies m
+right join moviesdb.financials f
+on m.movie_id = f.movie_id; 
+
+
+
+select * from 
+(
+select m.title,f.budget,f.revenue, (f.revenue-f.budget) as profit  from 
+moviesdb.movies m
+right join moviesdb.financials f
+on m.movie_id = f.movie_id 
+) as f_prf
+where profit < 800 and profit > 300;
+
+
+select * from moviesdb.movies;
+
+-- 101, 105, 109
+
+select * from moviesdb.movies where movie_id = 101 or movie_id = 105 or movie_id = 109;
+select * from moviesdb.movies where movie_id in (101, 105 , 109);
