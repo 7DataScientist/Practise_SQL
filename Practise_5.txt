@@ -1,0 +1,104 @@
+--  17th July 2023
+
+select * from moviesdb.movies;
+
+-- 101, 105, 109
+
+select * from moviesdb.movies where movie_id = 101 or movie_id = 105 or movie_id = 109;
+select * from moviesdb.movies where movie_id in (101, 105 , 109);
+
+
+select title,max(imdb_rating) from moviesdb.movies;
+
+select * from moviesdb.movies where imdb_rating = max(imdb_rating);
+select * from moviesdb.movies where imdb_rating = 9.3;
+
+
+select * from moviesdb.movies where imdb_rating = (select max(imdb_rating) from moviesdb.movies);
+select * from moviesdb.movies where imdb_rating = (select min(imdb_rating) from moviesdb.movies);
+
+select * from moviesdb.movies where imdb_rating = (select avg(imdb_rating) from moviesdb.movies);
+
+
+select * from moviesdb.movies where imdb_rating in 
+((select max(imdb_rating) from moviesdb.movies),(select min(imdb_rating) from moviesdb.movies));
+
+
+select * from moviesdb.movies where imdb_rating in (9.3, 7.6);
+
+select * from moviesdb.actors;
+
+select *, curdate() from moviesdb.actors;
+
+
+select *, year(curdate()) from moviesdb.actors;
+
+select *, year(curdate()) - birth_year as age from moviesdb.actors;
+
+-- 50 to 80 
+
+select *, year(curdate()) - birth_year as age from moviesdb.actors where age > 50 and age < 80;
+
+
+-- Option - 1  
+
+select *, year(curdate()) - birth_year as age 
+from moviesdb.actors 
+where year(curdate()) - birth_year > 50 and year(curdate()) - birth_year < 80;
+
+-- Option - 2 
+
+select *, year(curdate()) - birth_year as age from moviesdb.actors;
+
+select *
+from (select *, (year(curdate()) - birth_year) as age from moviesdb.actors) as age_table
+where age > 50 and age < 80;
+
+
+-- Any and All Operators
+
+select * from moviesdb.movies; 
+
+select * from moviesdb.movie_actor;
+
+--  Select actors who acted in any of there movies (101, 109, 123) 
+
+-- Option - 1  
+
+select * 
+from actors a 
+join movie_actor ma
+on a.actor_id = ma.actor_id
+where movie_id in (101, 109, 123);
+
+
+-- Option - 2  
+
+select * from moviesdb.movie_actor where movie_id in (101, 109, 123);
+
+select * from moviesdb.actors
+where actor_id in (select * from moviesdb.movie_actor where movie_id in (101, 109, 123));
+
+select * from moviesdb.actors
+where actor_id = ANY (select actor_id from moviesdb.movie_actor where movie_id in (101, 109, 123));
+
+
+-- select all movies whose rating is greater than *any* of the marvel movies rating
+
+select * from moviesdb.movies where studio = "Marvel Studios";
+
+select * from moviesdb.movies 
+where imdb_rating in (select imdb_rating from moviesdb.movies where studio = "Marvel Studios") 
+and studio != "Marvel Studios"; 
+
+
+select * from moviesdb.movies 
+where imdb_rating = ANY (select imdb_rating from moviesdb.movies where studio = "Marvel Studios") 
+and studio != "Marvel Studios";
+
+
+select min(imdb_rating) from moviesdb.movies where studio = "Marvel Studios";
+
+select * from moviesdb.movies 
+where imdb_rating > (select min(imdb_rating) from moviesdb.movies where studio = "Marvel Studios") 
+and studio != "Marvel Studios"; 
