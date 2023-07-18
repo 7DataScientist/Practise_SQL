@@ -1,0 +1,81 @@
+--  18th July 2023
+ 
+ select * from moviesdb.languages;
+ select * from moviesdb.movies;
+ 
+ --  movie_id = (104, 111, 123)
+ 
+ select * 
+ from moviesdb.movies m
+ join moviesdb.languages l
+ on m.language_id = l.language_id
+ where movie_id in (104, 107, 123);
+ 
+ 
+select * from moviesdb.movies 
+where language_id = ANY (select language_id from moviesdb.languages where movie_id in (104, 107, 123));
+ 
+ -- Get the actor id, actor name and the total number of movies they acted in.
+
+select * from moviesdb.movies;
+     --    |
+select * from moviesdb.movie_actor;
+     --    |
+select * from moviesdb.actors;
+
+
+ -- Get the actor id, actor name and the total number of movies they acted in.
+
+select a.actor_id, a.name, group_concat(m.title separator " | ") as title, count(m.title) 
+from moviesdb.movies m
+
+join moviesdb.movie_actor ma 
+using (movie_id)
+
+join moviesdb.actors a
+on a.actor_id = ma.actor_id
+
+group by a.name;
+
+
+
+-- Option 2
+
+explain analyze
+select ma.movie_id, a.actor_id, a.name, count(*) as cnt
+from moviesdb.movie_actor ma
+join moviesdb.actors a 
+using (actor_id)
+group by actor_id;
+
+
+-- Option 2A
+
+explain analyze
+select actor_id, `name`, 
+	( select count(*) from moviesdb.movie_actor where actor_id = moviesdb.actors.actor_id) as mov_cnt
+from moviesdb.actors
+group by actor_id;
+
+
+-- CTE (COMMON TABLE EXPRESSION)
+
+select * from moviesdb.movies;
+
+select * from moviesdb.movies where release_year in 
+( (select max(release_year) from moviesdb.movies), (select min(release_year) from moviesdb.movies) );
+
+-- Age of the actor
+
+
+select * from moviesdb.actors; 
+
+select *, year(curdate()) - birth_year as age from moviesdb.actors
+where age < 80 and age > 50;
+
+with actor_age as 
+(
+select `name` as actor_name, year(curdate()) - birth_year as age from moviesdb.actors
+)
+select actor_name, age from actor_age
+where age < 80 and age > 50;
