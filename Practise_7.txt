@@ -1,0 +1,54 @@
+-- 19th JULY 2023 
+
+-- Movies that produced 500% profit or more and their rating was less than average rating for all movies 
+ 
+-- 1. Movies that produced 500% profit or more
+-- 2. Their rating was less than average rating for all movies 
+
+
+select * from moviesdb.movies;
+select * from moviesdb.financials;
+
+select movie_id, budget, revenue, round(((revenue - budget)/budget ) * 100, 2) as prt_pect from moviesdb.financials
+where ((revenue - budget)/budget ) * 100 > 500;
+
+-- select avg(imdb_rating) from moviesdb.movies;
+select * from moviesdb.movies where imdb_rating < (select avg(imdb_rating) from moviesdb.movies);
+
+-- Option 1 
+
+select f.movie_id, m.title, m.imdb_rating,  f.budget, f.revenue, round(((revenue - budget)/budget ) * 100, 2) as prt_pect 
+from moviesdb.financials f
+join moviesdb.movies m
+on f.movie_id = m.movie_id
+where ((revenue - budget)/budget ) * 100 > 500 and
+imdb_rating < (select avg(imdb_rating) from moviesdb.movies);
+
+
+-- Option 2
+
+with 
+x as (select movie_id, budget, revenue, round(((revenue - budget)/budget ) * 100, 2) as prt_pect from moviesdb.financials
+where ((revenue - budget)/budget ) * 100 > 500),
+y as (select * from moviesdb.movies where imdb_rating < (select avg(imdb_rating) from moviesdb.movies))
+ 
+select y.movie_id, title, imdb_rating, prt_pect 
+from x 
+join y
+on x.movie_id = y.movie_id;
+
+
+with 
+
+fin as (
+select movie_id, budget, revenue, round(((revenue - budget)/budget ) * 100, 2) as prt_pect from moviesdb.financials
+where ((revenue - budget)/budget ) * 100 > 500
+),
+mov as (
+select * from moviesdb.movies where imdb_rating < (select avg(imdb_rating) from moviesdb.movies)
+)
+
+select mov.movie_id, title, imdb_rating, prt_pect 
+from fin 
+join mov
+on  fin.movie_id = mov.movie_id;
