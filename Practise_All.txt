@@ -1,0 +1,645 @@
+-- Text Queries 
+
+use moviesdb;
+
+select * from movies;
+select * from moviesdb.movies;
+
+select * from moviesdb.movies where industry = "bollywood";
+select * from moviesdb.movies where industry = "hollywood";
+
+select count(*) from movies where industry = "bollywood";
+select count(distinct title) from movies  where industry = "bollywood";
+
+select distinct studio, industry from moviesdb.movies;
+
+select title, industry from movies;
+
+select * from moviesdb.movies where title like "%THOR%";
+select * from moviesdb.movies where title like "%america%";
+
+-- Distinct, Select, Where, Like
+
+-- ------------------------------------------------------
+
+-- Numeric Queries 
+
+select * from moviesdb.movies;
+
+select * from moviesdb.movies where imdb_rating >= 9.0;
+select * from moviesdb.movies where imdb_rating > 9.0;
+
+select * from moviesdb.movies where imdb_rating > 6 and imdb_rating < 9;
+select * from moviesdb.movies where imdb_rating between 6 and 9;
+
+
+select * from moviesdb.movies where release_year = 2018 or release_year = 2019 or release_year = 2022;
+select * from moviesdb.movies where release_year in (2022,2019,2018);
+
+select * from moviesdb.movies where studio in ('Marvel Studios','Salman Khan Films');
+
+
+select * from moviesdb.movies;
+
+
+select * from moviesdb.movies where imdb_rating is Null;
+
+select * from moviesdb.movies where imdb_rating is not Null;
+
+select * from moviesdb.movies where industry = "bollywood" order by imdb_rating;
+select * from moviesdb.movies where industry = "bollywood" order by imdb_rating desc;
+
+
+select * from moviesdb.movies order by imdb_rating desc limit 5;
+
+select * from moviesdb.movies where industry = "bollywood" order by imdb_rating desc LIMIT 5 OFFSET 2;
+
+
+-- Summary Analytics ------------
+
+select * from moviesdb.movies;
+
+select count(*) from moviesdb.movies where industry = "bollywood";
+select count(*) from moviesdb.movies where industry = "hollywood";
+
+
+select avg(imdb_rating) from moviesdb.movies where industry = "bollywood";
+select round(avg(imdb_rating),2) from moviesdb.movies where industry = "hollywood";
+
+select min(imdb_rating) from moviesdb.movies where industry = "bollywood";
+
+select title, imdb_rating from moviesdb.movies where industry = "bollywood" and imdb_rating = 1.9;
+
+select avg(imdb_rating) from moviesdb.movies where studio = "Marvel Studios";
+select round(avg(imdb_rating),2) from moviesdb.movies where studio = "Marvel Studios";
+
+
+select round(avg(imdb_rating),2) as avg_imdb from moviesdb.movies where studio = "Marvel Studios";
+
+select count(*) from moviesdb.movies where industry in ("hollywood", "bollywood");
+
+-- bollywood = 18
+-- hollywood = 21
+
+select industry, count(*) from moviesdb.movies group by industry;
+
+select  studio, industry,count(*) from moviesdb.movies group by studio;
+
+select  studio, industry,count(*) as cnt from moviesdb.movies group by studio order by cnt desc limit 5;
+
+select  studio, industry,count(*) as cnt from moviesdb.movies where studio !="" group by studio order by cnt desc;
+
+select  studio, industry,count(*) as cnt from moviesdb.movies where studio like "M%" group by studio order by cnt desc;
+
+
+-- this is wrong 
+select  studio, industry,count(*) as cnt from moviesdb.movies where cnt > 2 group by studio order by cnt desc;
+
+
+select  studio, industry,count(*) as cnt from moviesdb.movies group by studio having cnt > 2  order by cnt desc;
+
+
+-- Calculated Columns
+
+select * from moviesdb.actors;
+
+select *, curdate() from moviesdb.actors;
+
+select *, year(curdate()) from moviesdb.actors;
+
+select *, year(curdate()) - birth_year as age from moviesdb.actors;
+
+select * from moviesdb.financials;
+
+select *, revenue - budget as profit from moviesdb.financials;
+
+select *, revenue - budget as profit from moviesdb.financials order by profit desc;
+
+select *, IF(currency = "INR", revenue, revenue * 82 ) as revenue_inr from moviesdb.financials order by revenue desc;
+
+select *, 
+	IF(currency = "INR", revenue, revenue * 82 ) as revenue_inr, 
+	IF(currency = "INR", budget, budget * 82 ) as budget_inr
+from moviesdb.financials order by revenue_inr desc;
+
+select * from moviesdb.financials;
+select distinct unit from moviesdb.financials;
+
+
+select movie_id,budget,revenue,unit from moviesdb.financials order by revenue desc;
+
+select distinct unit from moviesdb.financials;
+
+select movie_id, budget, revenue, unit from moviesdb.financials order by revenue desc;
+
+select *, 
+	case
+		when unit = "thousands" then revenue/1000
+        when unit = "millions" then revenue
+        when unit = "billions" then revenue * 1000
+    end as rev_mln
+from moviesdb.financials order by rev_mln desc;
+
+
+select movie_id, budget, revenue, unit, 
+	case
+		when unit = "thousands" then revenue/1000
+        when unit = "millions" then revenue
+        when unit = "billions" then revenue * 1000
+    end as rev_mln
+from moviesdb.financials order by rev_mln desc;
+
+-- ---------------------------------------------------------- 
+-- Inner Join  
+
+-- select * 
+-- from table_1 t1
+-- join table_2 t2
+-- on t1.col1 = t2.col1
+
+select * from moviesdb.movies;
+select * from moviesdb.languages;
+select * from moviesdb.financials;
+select * from moviesdb.movie_actor;
+
+select * from 
+moviesdb.movies 
+join moviesdb.financials
+on movies.movie_id = financials.movie_id;
+
+select m.title, m.movie_id, f.budget, m.imdb_rating from 
+moviesdb.movies m
+inner join moviesdb.financials f
+on m.movie_id = f.movie_id;
+
+
+select m.title, m.movie_id, f.budget, m.imdb_rating from 
+moviesdb.movies m
+inner join moviesdb.financials f
+using(movie_id);
+
+
+select m.title, m.movie_id, f.budget, m.imdb_rating from 
+moviesdb.movies m
+inner join moviesdb.financials f
+using(movie_id) where m.imdb_rating > 7.5 order by m.imdb_rating desc;
+
+--  Left Join
+
+select * from 
+moviesdb.movies 
+left join moviesdb.financials
+on movies.movie_id = financials.movie_id;
+
+-- Right Join
+
+select * from 
+moviesdb.movies m
+right join moviesdb.financials f
+on m.movie_id = f.movie_id; 
+
+select f.movie_id,m.title,m.industry,f.budget,f.revenue from 
+moviesdb.movies m
+right join moviesdb.financials f
+on m.movie_id = f.movie_id; 
+
+-- Full Join
+
+select f.movie_id,m.title,m.industry,f.budget,f.revenue 
+from moviesdb.movies as m
+left join moviesdb.financials as f
+on m.movie_id = f.movie_id
+
+
+union
+
+select f.movie_id,m.title,m.industry,f.budget,f.revenue 
+from moviesdb.movies as m
+right join moviesdb.financials as f
+on m.movie_id = f.movie_id;
+
+
+-- Analytics on Tables 
+
+select * from moviesdb.movies;
+select * from moviesdb.languages;
+select * from moviesdb.financials;
+
+-- 1. Movie Title, Profit,Budget, Revenue ?  
+
+select *, round(((revenue-budget)*100)/budget,2) as profit from moviesdb.financials;
+
+
+select m.title, f.budget, f.revenue, round(((revenue-budget)*100)/budget,2) as profit, f.unit
+from moviesdb.movies as m
+join moviesdb.financials as f
+on m.movie_id = f.movie_id
+where industry = "bollywood"
+order by profit desc;
+
+-- Highest Profit 
+
+
+select title, budget, revenue, unit, round((revenue-budget),2) as profit,
+case
+	when unit="thousands" then round((revenue-budget)/1000,2)
+    when unit="millions" then round((revenue-budget),2)
+    when unit="billions" then round((revenue-budget)*1000,2)
+end as profit_nor
+from moviesdb.movies as m
+join moviesdb.financials as f
+on m.movie_id = f.movie_id
+where industry = "bollywood"
+order by profit_nor desc;
+
+-- Joining more than 2 tables
+
+select * from moviesdb.movies;
+select * from moviesdb.languages;
+select * from moviesdb.movie_actor;
+select * from moviesdb.actors;
+
+-- title , actor, language 
+
+select * 
+from moviesdb.movies m
+join moviesdb.languages l
+on m.language_id = l.language_id;
+
+
+select m.title, l.name as lang, a.name
+from moviesdb.movies m
+
+join moviesdb.languages l
+on m.language_id = l.language_id
+
+join moviesdb.movie_actor ma
+on m.movie_id = ma.movie_id
+
+join moviesdb.actors a
+on a.actor_id = ma.actor_id;
+
+
+-- Group Concat
+
+select m.title, l.name as lang, group_concat(a.name separator " | ") as actors
+from moviesdb.movies m
+
+join moviesdb.languages l
+on m.language_id = l.language_id
+
+join moviesdb.movie_actor ma
+on m.movie_id = ma.movie_id
+
+join moviesdb.actors a
+on a.actor_id = ma.actor_id
+
+group by m.title; 
+
+
+select m.title, l.name as lang, group_concat(a.name separator " | ") as actors, count(a.name) as cnt
+from moviesdb.movies m
+
+join moviesdb.languages l
+on m.language_id = l.language_id
+
+join moviesdb.movie_actor ma
+on m.movie_id = ma.movie_id
+
+join moviesdb.actors a
+on a.actor_id = ma.actor_id
+
+group by m.title; 
+
+
+-- ------------ 
+
+select a.name, group_concat(m.title separator " | ") as title, count(m.title) as cnt
+from moviesdb.movies m
+
+join moviesdb.movie_actor ma
+on m.movie_id = ma.movie_id
+
+join moviesdb.actors a
+on ma.actor_id = a.actor_id
+
+group by a.name
+order by cnt desc;
+
+
+-- -----------------
+
+-- Complex Queries
+
+select * from moviesdb.movies;
+
+select max(imdb_rating) from moviesdb.movies;
+
+select * from moviesdb.movies where movies.imdb_rating = 9.3;
+
+select * from moviesdb.movies where movies.imdb_rating = max(imdb_rating);
+
+select * from moviesdb.movies where movies.imdb_rating = (select max(imdb_rating) from moviesdb.movies);
+select * from moviesdb.movies where movies.imdb_rating = (select min(imdb_rating) from moviesdb.movies);
+
+
+select avg(imdb_rating) from moviesdb.movies;
+
+select * from moviesdb.movies where movies.imdb_rating < (select avg(imdb_rating) from moviesdb.movies);
+
+select * from moviesdb.movies where movies.imdb_rating in ((select max(imdb_rating) from moviesdb.movies),(select min(imdb_rating) from moviesdb.movies)); 
+
+select * from moviesdb.movies where movies.imdb_rating 
+= (select max(imdb_rating) from moviesdb.movies) or imdb_rating = (select min(imdb_rating) from moviesdb.movies);
+
+
+select * from moviesdb.actors;
+
+select `name`, year(curdate()) - birth_year as age from moviesdb.actors;
+
+select `name`, year(curdate()) - birth_year as age from moviesdb.actors where age < 85 and age > 50;
+
+select `name`, year(curdate()) - birth_year as age from moviesdb.actors 
+where year(curdate()) - birth_year > 50 and year(curdate()) - birth_year < 85;
+
+
+select * from (select `name`, year(curdate()) - birth_year as age from moviesdb.actors) as age_d
+where age < 85 and age > 50; 
+
+
+select * from (select `name`, year(curdate()) - birth_year as age from moviesdb.actors) as age_d
+where age < 85 and age > 50; 
+
+
+select movie_id,budget,revenue, (revenue-budget) as profit from moviesdb.financials;
+
+-- profit 300 and 800
+
+select movie_id,budget,revenue, (revenue-budget) as profit from moviesdb.financials
+where (revenue-budget) < 800 and (revenue-budget) > 300;
+
+
+select * from 
+(select movie_id,budget,revenue, (revenue-budget) as profit from moviesdb.financials) as f_prf
+where profit < 800 and profit > 300;
+
+
+select m.title,f.budget,f.revenue, (f.revenue-f.budget) as profit  from 
+moviesdb.movies m
+right join moviesdb.financials f
+on m.movie_id = f.movie_id; 
+
+
+
+select * from 
+(
+select m.title,f.budget,f.revenue, (f.revenue-f.budget) as profit  from 
+moviesdb.movies m
+right join moviesdb.financials f
+on m.movie_id = f.movie_id 
+) as f_prf
+where profit < 800 and profit > 300;
+
+
+--  17th July 2023
+
+select * from moviesdb.movies;
+
+-- 101, 105, 109
+
+select * from moviesdb.movies where movie_id = 101 or movie_id = 105 or movie_id = 109;
+select * from moviesdb.movies where movie_id in (101, 105 , 109);
+
+
+select title,max(imdb_rating) from moviesdb.movies;
+
+select * from moviesdb.movies where imdb_rating = max(imdb_rating);
+select * from moviesdb.movies where imdb_rating = 9.3;
+
+
+select * from moviesdb.movies where imdb_rating = (select max(imdb_rating) from moviesdb.movies);
+select * from moviesdb.movies where imdb_rating = (select min(imdb_rating) from moviesdb.movies);
+
+select * from moviesdb.movies where imdb_rating = (select avg(imdb_rating) from moviesdb.movies);
+
+
+select * from moviesdb.movies where imdb_rating in 
+((select max(imdb_rating) from moviesdb.movies),(select min(imdb_rating) from moviesdb.movies));
+
+
+select * from moviesdb.movies where imdb_rating in (9.3, 7.6);
+
+select * from moviesdb.actors;
+
+select *, curdate() from moviesdb.actors;
+
+
+select *, year(curdate()) from moviesdb.actors;
+
+select *, year(curdate()) - birth_year as age from moviesdb.actors;
+
+-- 50 to 80 
+
+select *, year(curdate()) - birth_year as age from moviesdb.actors where age > 50 and age < 80;
+
+
+-- Option - 1  
+
+select *, year(curdate()) - birth_year as age 
+from moviesdb.actors 
+where year(curdate()) - birth_year > 50 and year(curdate()) - birth_year < 80;
+
+-- Option - 2 
+
+select *, year(curdate()) - birth_year as age from moviesdb.actors;
+
+select *
+from (select *, (year(curdate()) - birth_year) as age from moviesdb.actors) as age_table
+where age > 50 and age < 80;
+
+
+-- Any and All Operators
+
+select * from moviesdb.movies; 
+
+select * from moviesdb.movie_actor;
+
+--  Select actors who acted in any of there movies (101, 109, 123) 
+
+-- Option - 1  
+
+select * 
+from actors a 
+join movie_actor ma
+on a.actor_id = ma.actor_id
+where movie_id in (101, 109, 123);
+
+
+-- Option - 2  
+
+select * from moviesdb.movie_actor where movie_id in (101, 109, 123);
+
+select * from moviesdb.actors
+where actor_id in (select * from moviesdb.movie_actor where movie_id in (101, 109, 123));
+
+select * from moviesdb.actors
+where actor_id = ANY (select actor_id from moviesdb.movie_actor where movie_id in (101, 109, 123));
+
+
+-- select all movies whose rating is greater than *any* of the marvel movies rating
+
+select * from moviesdb.movies where studio = "Marvel Studios";
+
+select * from moviesdb.movies 
+where imdb_rating in (select imdb_rating from moviesdb.movies where studio = "Marvel Studios") 
+and studio != "Marvel Studios"; 
+
+
+select * from moviesdb.movies 
+where imdb_rating = ANY (select imdb_rating from moviesdb.movies where studio = "Marvel Studios") 
+and studio != "Marvel Studios";
+
+
+select min(imdb_rating) from moviesdb.movies where studio = "Marvel Studios";
+
+select * from moviesdb.movies 
+where imdb_rating > (select min(imdb_rating) from moviesdb.movies where studio = "Marvel Studios") 
+and studio != "Marvel Studios"; 
+ 
+ 
+ --  18th July 2023
+ 
+ select * from moviesdb.languages;
+ select * from moviesdb.movies;
+ 
+ --  movie_id = (104, 111, 123)
+ 
+ select * 
+ from moviesdb.movies m
+ join moviesdb.languages l
+ on m.language_id = l.language_id
+ where movie_id in (104, 107, 123);
+ 
+ 
+select * from moviesdb.movies 
+where language_id = ANY (select language_id from moviesdb.languages where movie_id in (104, 107, 123));
+ 
+ -- Get the actor id, actor name and the total number of movies they acted in.
+
+select * from moviesdb.movies;
+     --    |
+select * from moviesdb.movie_actor;
+     --    |
+select * from moviesdb.actors;
+
+
+ -- Get the actor id, actor name and the total number of movies they acted in.
+
+select a.actor_id, a.name, group_concat(m.title separator " | ") as title, count(m.title) 
+from moviesdb.movies m
+
+join moviesdb.movie_actor ma 
+using (movie_id)
+
+join moviesdb.actors a
+on a.actor_id = ma.actor_id
+
+group by a.name;
+
+
+
+-- Option 2
+
+explain analyze
+select ma.movie_id, a.actor_id, a.name, count(*) as cnt
+from moviesdb.movie_actor ma
+join moviesdb.actors a 
+using (actor_id)
+group by actor_id;
+
+
+-- Option 2A
+
+explain analyze
+select actor_id, `name`, 
+	( select count(*) from moviesdb.movie_actor where actor_id = moviesdb.actors.actor_id) as mov_cnt
+from moviesdb.actors
+group by actor_id;
+
+
+-- CTE (COMMON TABLE EXPRESSION)
+
+select * from moviesdb.movies;
+
+select * from moviesdb.movies where release_year in 
+( (select max(release_year) from moviesdb.movies), (select min(release_year) from moviesdb.movies) );
+
+-- Age of the actor
+
+
+select * from moviesdb.actors; 
+
+select *, year(curdate()) - birth_year as age from moviesdb.actors
+where age < 80 and age > 50;
+
+with actor_age as 
+(
+select `name` as actor_name, year(curdate()) - birth_year as age from moviesdb.actors
+)
+select actor_name, age from actor_age
+where age < 80 and age > 50;
+
+-- 19th JULY 2023 
+
+-- Movies that produced 500% profit or more and their rating was less than average rating for all movies 
+ 
+-- 1. Movies that produced 500% profit or more
+-- 2. Their rating was less than average rating for all movies 
+
+
+select * from moviesdb.movies;
+select * from moviesdb.financials;
+
+select movie_id, budget, revenue, round(((revenue - budget)/budget ) * 100, 2) as prt_pect from moviesdb.financials
+where ((revenue - budget)/budget ) * 100 > 500;
+
+-- select avg(imdb_rating) from moviesdb.movies;
+select * from moviesdb.movies where imdb_rating < (select avg(imdb_rating) from moviesdb.movies);
+
+-- Option 1 
+
+select f.movie_id, m.title, m.imdb_rating,  f.budget, f.revenue, round(((revenue - budget)/budget ) * 100, 2) as prt_pect 
+from moviesdb.financials f
+join moviesdb.movies m
+on f.movie_id = m.movie_id
+where ((revenue - budget)/budget ) * 100 > 500 and
+imdb_rating < (select avg(imdb_rating) from moviesdb.movies);
+
+
+-- Option 2
+
+with 
+x as (select movie_id, budget, revenue, round(((revenue - budget)/budget ) * 100, 2) as prt_pect from moviesdb.financials
+where ((revenue - budget)/budget ) * 100 > 500),
+y as (select * from moviesdb.movies where imdb_rating < (select avg(imdb_rating) from moviesdb.movies))
+ 
+select y.movie_id, title, imdb_rating, prt_pect 
+from x 
+join y
+on x.movie_id = y.movie_id;
+
+
+with 
+
+fin as (
+select movie_id, budget, revenue, round(((revenue - budget)/budget ) * 100, 2) as prt_pect from moviesdb.financials
+where ((revenue - budget)/budget ) * 100 > 500
+),
+mov as (
+select * from moviesdb.movies where imdb_rating < (select avg(imdb_rating) from moviesdb.movies)
+)
+
+select mov.movie_id, title, imdb_rating, prt_pect 
+from fin 
+join mov
+on  fin.movie_id = mov.movie_id;
